@@ -20,3 +20,6 @@ A simple Streamlit app that analyzes facial lighting conditions and skin tone un
 pip install streamlit opencv-python numpy pillow
 streamlit run app.py
 ```
+##  Notes
+- Place haarcascade_frontalface_default.xml in the same folder as app.py or call from environment
+- Works best with front-facing selfies
