@@ -16,7 +16,11 @@ A Streamlit app that analyzes facial lighting conditions and skin tone uniformit
 
 ## Demo
 
-![Demo GIF or Screenshot](demo.gif)  
+![Demo GIF or Screenshot](skin-tone-detector.gif)  
+<p align="center">
+  <img src="skin-tone-detector.gif" alt="Skin Tone Detector Demo" width="400"/>
+</p>
+
 
 
 ---

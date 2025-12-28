@@ -6,11 +6,22 @@ from PIL import Image
 # Load face detector
 face_cascade = cv2.CascadeClassifier(".venv/lib/python3.13/site-packages/cv2/data/haarcascade_frontalface_default.xml")
 
+# -----------------------------
+# Helper Functions
+# -----------------------------
+def get_brightness_feedback(brightness):
+    if brightness < 80:
+        return "💡 Too low"
+    elif brightness > 180:
+        return "☀️ Too harsh"
+    else:
+        return "👌 Good"
 
-st.title("🧴 Skin Tone & Lighting Analyzer")
-st.write("Choose how you want to input your selfie:")
-
-mode = st.radio("Choose input mode:", ["Upload Photo", "Live Webcam"])
+def get_skin_feedback(skin_uniformity):
+    if skin_uniformity > 35:
+        return "⚠️ Uneven"
+    else:
+        return "✨ Even"
 
 def analyze_face(img):
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -29,24 +40,60 @@ def analyze_face(img):
     brightness = np.mean(v_channel)
     skin_uniformity = np.std(h_channel) + np.std(s_channel)
 
+    # -----------------------------
+    # Display face
+    # -----------------------------
     st.image(face, caption="Detected Face", width=300)
-    st.metric("Lighting Score", f"{brightness:.1f}")
-    st.metric("Skin Tone Variation", f"{skin_uniformity:.1f}")
 
-    # Feedback
+    # -----------------------------
+    # Metrics in columns
+    # -----------------------------
+    col1, col2 = st.columns(2)
+    col1.metric("Lighting Score", f"{brightness:.1f}", delta=get_brightness_feedback(brightness))
+    col2.metric("Skin Tone Variation", f"{skin_uniformity:.1f}", delta=get_skin_feedback(skin_uniformity))
+
+    # -----------------------------
+    # Feedback messages
+    # -----------------------------
     if brightness < 80:
-        st.warning("Lighting is too low. Try natural daylight.")
+        st.markdown("### ⚠️ Lighting is too low. Try natural daylight.")
     elif brightness > 180:
-        st.warning("Lighting is too harsh. Avoid direct sunlight.")
+        st.markdown("### ☀️ Lighting is too harsh. Avoid direct sunlight.")
     else:
-        st.success("Lighting looks good 👍")
+        st.markdown("### ✅ Lighting looks good!")
 
     if skin_uniformity > 35:
-        st.info("Some uneven skin tone detected. Could be shadows or pigmentation.")
+        st.markdown("### ⚠️ Some uneven skin tone detected. Could be shadows or pigmentation.")
     else:
-        st.success("Skin tone looks fairly even ✨")
+        st.markdown("### ✅ Skin tone looks fairly even!")
 
+    # -----------------------------
+    # Skincare tips
+    # -----------------------------
+    with st.expander("💡 Skincare Photo Tips"):
+        st.write("""
+        - Use even lighting for selfies
+        - Avoid harsh shadows
+        - Natural daylight works best
+        - Remove sunglasses or hats
+        """)
+
+# -----------------------------
+# Streamlit UI
+# -----------------------------
+st.set_page_config(page_title="Skin Tone & Lighting Analyzer", layout="centered")
+
+st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🧴 Skin Tone & Lighting Analyzer</h1>", unsafe_allow_html=True)
+st.write("Analyze your selfie for lighting quality and skin tone uniformity. Choose your input mode from the sidebar.")
+
+# Sidebar
+st.sidebar.title("Settings")
+mode = st.sidebar.radio("Choose input mode:", ["Upload Photo", "Live Webcam"])
+st.sidebar.write("Use the webcam for live analysis or upload a selfie for quick results.")
+
+# -----------------------------
 # Handle modes
+# -----------------------------
 if mode == "Upload Photo":
     uploaded_file = st.file_uploader("Upload a selfie", type=["jpg", "jpeg", "png"])
     if uploaded_file:
